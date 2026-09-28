@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 const DEFAULT_TRACK_SEGMENT_DURATION_MS = 30_000;
-const VIDEO_DURATION_OPTIONS = [30] as const;
+const VIDEO_DURATION_OPTIONS = [15, 30, 60, 90] as const;
 
 export function JourneyPanel() {
   const { t } = useI18n();
