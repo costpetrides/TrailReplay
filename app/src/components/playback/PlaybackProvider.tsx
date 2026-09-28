@@ -12,8 +12,9 @@ const OUTRO_DELAY = 0; // Start the final fly-out as soon as the route ends
 const OUTRO_DURATION = 3000; // 3 seconds for zoom-out
 const AUTO_RESET_DELAY = 3000; // 3 seconds after outro before auto-reset
 
-// Duration limits (in milliseconds)
-const MIN_DURATION = 15000; // Keep the 15-second Timeline preset valid
+// Ryodo baseline: at 1x every GPX route replays in exactly 30 seconds.
+// Intro/outro are cinematic phases around the route and are not part of this duration.
+const ROUTE_PLAYBACK_DURATION_MS = 30_000
 
 export function PlaybackProvider({ children }: PlaybackProviderProps) {
   const playback = useAppStore((state) => state.playback);
@@ -37,22 +38,11 @@ export function PlaybackProvider({ children }: PlaybackProviderProps) {
 
   const activeTrack = tracks.find((t) => t.id === activeTrackId);
 
-  // Calculate total duration based on journey segments or active track.
-  // Only a floor is enforced (to keep the 15-second Timeline preset valid);
-  // there's no upper cap, so segment durations set in the Journey panel are
-  // fully honored regardless of how long the resulting video is.
+  // Fixed playback clock: 1x always means a 30-second route film,
+  // independent of the GPX activity's recorded duration or sport.
   const calculateTotalDuration = useCallback(() => {
-    let duration = 0;
-
-    // If we have journey segments, use their total duration
-    if (journeySegments.length > 0) {
-      duration = journeySegments.reduce((sum, seg) => sum + (seg.duration || 0), 0);
-    } else if (activeTrack) {
-      // Default to 60 seconds for a track
-      duration = 60000;
-    }
-
-    return Math.max(MIN_DURATION, duration);
+    const hasRoute = journeySegments.length > 0 || Boolean(activeTrack);
+    return hasRoute ? ROUTE_PLAYBACK_DURATION_MS : 0;
   }, [journeySegments, activeTrack]);
 
   // Clear all timeouts
